@@ -34,7 +34,7 @@
  *              Coast (cst):           D1: N/A;          p1: 0%;              P2: 0%;
  */
 
-unsigned char chassisState = 'c'; // c - coast; b - brake; n - clockwise; p - counter-clockwise; f - forward; r - reverse;
+char chassisState = 'c'; // c - coast; b - brake; n - clockwise; p - counter-clockwise; f - forward; r - reverse;
 short speed = 0;
 short yaw = 0;
 short pitch = 0;
@@ -50,11 +50,54 @@ void setup() {
     pinMode(PIN_PB1, OUTPUT);
     pinMode(PIN_PB2, OUTPUT);
     brk();
+    Serial.begin(9600);
+    while (!Serial) { ; }
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-
+	// wait for Serial input
+    if (Serial.available() > 0) {
+        String command = "";
+		// build command
+        while (Serial.available() > 0) {
+            char input = Serial.read();
+            if (input != ' ') {
+                command += input;
+            }
+        }
+		// process command. format is "t:[s]###". t = type, s = state, ### value (must be 3 numbers, even if less than 100).
+        if (command[1] == ':') {
+            switch (command[0]) {
+                case 'c': // chassis change
+                    short pos;
+                    pos = command.substring(3, 3).toInt();
+                    if (command[2] != chassisState || pos != speed) {
+                        speed = pos;
+                        switch (command[2]) {
+                            case 'b': brk(); break;
+                            case 'f': fwd(); break;
+                            case 'r': rev(); break;
+                            case 'c': cst(); break;
+                            case 'n': ccw(); break;
+                            case 'p': cw(); break;
+                        }
+                    }
+                    break;
+                case 'y': // yaw pos change
+                    pos = command.substring(2, 3).toInt();
+                    if (pos != yaw) {
+                        setYaw(pos);
+                    }
+                    break;
+                case 'p': // pitch pos change
+                    pos = command.substring(2, 3).toInt();
+                    if (pos != pitch) {
+                        setPitch(pos);
+                    }
+                    break;
+            }
+        }
+    }
 }
 
 void fwd() {
@@ -99,7 +142,7 @@ void brk() {
 
 void movLeft(bool directionFwd) {
     digitalWrite(PIN_D1, (directionFwd)? HIGH : LOW);
-    analogWrite(PIN_PA1, speed;
+    analogWrite(PIN_PA1, speed);
     analogWrite(PIN_PB1, speed);
 }
 
@@ -107,4 +150,12 @@ void movRight(bool directionFwd) {
     digitalWrite(PIN_D1, (directionFwd)? HIGH : LOW);
     analogWrite(PIN_PA2, speed);
     analogWrite(PIN_PB2, speed);
+}
+
+void setYaw(int pos) {
+    
+}
+
+void setPitch(int pos) {
+    
 }
