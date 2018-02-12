@@ -1,0 +1,25 @@
+The Motor Control Circuit will take PWM and Digital signals from the Arduino
+and manipulate them to control H-Bridge Drivers for the motors.
+
+Specifications:
+	v1:
+	- Each pair of motors uses one H-Bridge chip
+	- Each H-Bridge Chip is controlled by:
+		- 2 semi-synchronized PWM signals
+		- 1 Digital signal
+	- Passes Servo PWM signals directly from Aruino to Server leads
+	- Seperate power supply leads for Motors, Logic & Servos
+	- Fuses across +Voltage Power leads
+
+	v2:
+	- Each H-bridge chip is controlled by:
+		- 1 PWM speed signal
+		- 2 digital signals to indicate motor state (fwd,rev,brk,cst)
+	- Completely seperate from servos
+	- Seperate power supply leads for motors
+	- Logic power is supplied by Arduino
+	- Fuses across all motor leads
+	- Small ceramic capacitors across all motor leads
+	- Small ceramic capacitor in parallel with motors
+	- Electrolytic capacitors 
+	
