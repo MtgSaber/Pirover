@@ -1,6 +1,4 @@
 # Pirover
-All files associated with my Pirover project.
-
 Pirover is a wifi-controlled rover with a camera arm.
 This is an almost-completely DIY personal project.
 It's really just for the learning experience, and because I personally think that it's pretty cool.
