@@ -29,3 +29,51 @@
  * are converted into decimal for use with the Servo class functions.
  * 
  */
+
+/*
+const short LEFTD0 = , LEFTD1 = , LEFTPWM = , RIGHTD0 = , RIGHTD1 = , RIGHTPWM = ,
+    SERVO_0 = , SERVO_1 = , SERVO_2 = , SERVO_3 = ;
+*/
+
+short servo_0_pos, servo_1_pos, servo_2_pos, servo_3_pos, leftSpd, rightSpd;
+bool leftStateBits[2], rightStateBits[2];
+
+void setup() {
+  
+}
+
+void loop() {
+  // wait for input
+  if (Serial.available()) {
+    // build command
+    while (Serial.available() > 0) {
+      char input = Serial.read();
+      if (input != ' ') {
+          command += input;
+      }
+    }
+  }
+}
+
+void getStateBits(char code, bool bits[]) {
+  switch(code) {
+    case 'A': bits[0] = false; bits[1] = false; break;
+    case 'B': bits[0] = true; bits[1] = true; break;
+    case 'C': bits[0] = false; bits[1] = true; break;
+    case 'D': bits[0] = true; bits[1] = false; break;
+  }
+}
+
+short hexToDecimal(char hexDigit) {
+  switch(hexDigit) {
+    case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8:
+    case 9: return hexDigit - '0';
+    case 'A': return 10;
+    case 'B': return 11;
+    case 'C': return 12;
+    case 'D': return 13;
+    case 'E': return 14;
+    case 'F': return 15;
+  }
+}
+
