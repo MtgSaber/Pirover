@@ -37,6 +37,7 @@ const short LEFTD0 = , LEFTD1 = , LEFTPWM = , RIGHTD0 = , RIGHTD1 = , RIGHTPWM =
 
 short servo_0_pos, servo_1_pos, servo_2_pos, servo_3_pos, leftSpd, rightSpd;
 bool leftStateBits[2], rightStateBits[2];
+char HEX_DECIMAL_SYMBOLS[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
 void setup() {
   
@@ -44,15 +45,49 @@ void setup() {
 
 void loop() {
   // wait for input
+  String command;
   if (Serial.available()) {
     // build command
     while (Serial.available() > 0) {
       char input = Serial.read();
       if (input != ' ') {
+        if (input == '~')
+          command = input;
+        else if (input == '^') {
+          command += input;
+          processCommand(command);
+          setOutputs();
+        } else
           command += input;
       }
     }
   }
+}
+
+void processCommand(String command) {
+  if (command.length() != 16) return;
+  if (command[0] != '~') return;
+  for (short i=1; i < 14; i++) {
+    short hex = hexToDecimal(command[i]);
+    if (hex < 0)
+      return;
+    if ((i == 1 || i == 4) && (hex < 10 || hex > 13))
+      return;
+  }
+
+  getStateBits(command[1], leftStateBits);
+  getStateBits(command[4], leftStateBits);
+
+  servo_0_pos = hexToDecimal(command[7]) + hexToDecimal(command[8]);
+  servo_1_pos = hexToDecimal(command[9]) + hexToDecimal(command[10]);
+  servo_2_pos = hexToDecimal(command[11]) + hexToDecimal(command[12]);
+  servo_3_pos = hexToDecimal(command[13]) + hexToDecimal(command[14]);
+  leftSpd = hexToDecimal(command[2]) + hexToDecimal(command[3]);
+  rightSpd = hexToDecimal(command[5]) + hexToDecimal(command[6]);
+}
+
+void setOutputs() {
+  
 }
 
 void getStateBits(char code, bool bits[]) {
@@ -65,15 +100,9 @@ void getStateBits(char code, bool bits[]) {
 }
 
 short hexToDecimal(char hexDigit) {
-  switch(hexDigit) {
-    case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8:
-    case 9: return hexDigit - '0';
-    case 'A': return 10;
-    case 'B': return 11;
-    case 'C': return 12;
-    case 'D': return 13;
-    case 'E': return 14;
-    case 'F': return 15;
-  }
+  for (short i=0; i < 15; i++)
+    if (hexDigit == HEX_DECIMAL_SYMBOLS[i])
+      return i;
+  return -1;
 }
 
