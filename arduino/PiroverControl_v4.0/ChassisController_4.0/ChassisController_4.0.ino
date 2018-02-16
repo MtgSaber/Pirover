@@ -3,11 +3,11 @@
  * Author: Andrew Arnold (MtgSaber) 2/14/2018
  * 
  * The Arduino will recieve Serial commands from Raspi and interpret them
- * into chassis state changes. The command is a 14-digit hexadecimal number,
- * and the format is as follows:
+ * into chassis state changes. The command is a 14-digit hexadecimal number
+ * enclosed between start and end delimiters, and the format is as follows:
  * 
- *    [ABCD]|##|[ABCD]|##|##|##|##|##
- *    leftState|leftSpeed|rightState|rightSpeed|servo0Position|servo1Position|servo2Position|servo3Position
+ *    ~|[ABCD]|##|[ABCD]|##|##|##|##|##|^
+ *    BEGIN|leftState|leftSpeed|rightState|rightSpeed|servo0Position|servo1Position|servo2Position|servo3Position|END
  * 
  * The chassis control circuit Recieves the data for left and right speeds and states.   
  * These values are translated into the 3-signal formats for each side. These formats
@@ -35,14 +35,16 @@ const short LEFTD0 = , LEFTD1 = , LEFTPWM = , RIGHTD0 = , RIGHTD1 = , RIGHTPWM =
     SERVO_0 = , SERVO_1 = , SERVO_2 = , SERVO_3 = ;
 */
 
+const char HEX_DECIMAL_SYMBOLS[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+
 short servo_0_pos, servo_1_pos, servo_2_pos, servo_3_pos, leftSpd, rightSpd;
 bool leftStateBits[2], rightStateBits[2];
-char HEX_DECIMAL_SYMBOLS[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
 void setup() {
   
 }
 
+// Collects Serial inputs, constructs commands from them, processes them, and changes outputs accordingly.
 void loop() {
   // wait for input
   String command;
@@ -64,6 +66,7 @@ void loop() {
   }
 }
 
+// Interprets command and sets output variables accordingly
 void processCommand(String command) {
   if (command.length() != 16) return;
   if (command[0] != '~') return;
@@ -86,10 +89,12 @@ void processCommand(String command) {
   rightSpd = hexToDecimal(command[5]) + hexToDecimal(command[6]);
 }
 
+// Realizes the output variables into actual Pin signals
 void setOutputs() {
   
 }
 
+// Sets the motor state bits based on the input format
 void getStateBits(char code, bool bits[]) {
   switch(code) {
     case 'A': bits[0] = false; bits[1] = false; break;
@@ -99,6 +104,7 @@ void getStateBits(char code, bool bits[]) {
   }
 }
 
+// Returns the decimal number equivalent of the hex symbol provided; -1 if invalid symbol.
 short hexToDecimal(char hexDigit) {
   for (short i=0; i < 15; i++)
     if (hexDigit == HEX_DECIMAL_SYMBOLS[i])
