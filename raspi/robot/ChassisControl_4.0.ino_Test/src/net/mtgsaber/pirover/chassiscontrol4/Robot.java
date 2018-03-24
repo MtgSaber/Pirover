@@ -9,52 +9,74 @@ import com.fazecast.jSerialComm.SerialPort;
  * Driver for Arduino Uno. Can be driven by another class by using setState.
  */
 class Robot {
-    private StringBuffer status;
-    private MotorState curMotorState;
+    private StringBuilder statesAsString;
+    private MotorState leftMotor, rightMotor;
+    private int leftSpeed, rightSpeed, servo1, servo2, servo3, servo4;
     private Arduino arduino;
     private Object arduinoKey;
-
-    public static final char[] HEX_SYMBOLS = new char[] {
-            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
-    };
+    private boolean available, on;
 
     Robot()
             throws AlreadyInUseException,
                    ConnectionFailedException {
-        this.curMotorState = MotorState.COAST;
-        this.status = new StringBuffer(curMotorState.getName());
         this.arduinoKey = ArduinoWrapper.activate(SerialPort.getCommPorts()[0].getSystemPortName(), 9600);
         this.arduino = ArduinoWrapper.getArduino(arduinoKey);
+
+        leftMotor = MotorState.BRAKE;
+        rightMotor = MotorState.BRAKE;
+
+        leftSpeed = 0; rightSpeed = 0;
+        servo1 = 0; servo2 = 0;
+        servo3 = 0; servo4 = 0;
+
+        available = true;
     }
 
-    void setStates(MotorState leftMotorState, MotorState rightMotorState, int leftSpeed, int rightSpeed) {
-        final char[] message = new char[] {
-                '~','A','0','0','A','0','0',
-                '0','0','0','0','0','0','0','0','^'
-        };
+    void setStates(
+            MotorState leftMotorState, MotorState rightMotorState,
+            int leftSpeed, int rightSpeed,
+            int servo1, int servo2, int servo3, int servo4
+    ) {
+        if (0 > leftSpeed || leftSpeed > 0xFE) return;
+        if (0 > rightSpeed || rightSpeed > 0xFE) return;
+        if (0 > servo1 || servo1 > 0xB4) return;
+        if (0 > servo2 || servo2 > 0xB4) return;
+        if (0 > servo3 || servo3 > 0xB4) return;
+        if (0 > servo4 || servo4 > 0xB4) return;
 
-        message[1] = leftMotorState.getKey();
-        message[4] = rightMotorState.getKey();
+        leftMotor = leftMotorState;
+        rightMotor = rightMotorState;
+        this.leftSpeed = leftSpeed;
+        this.rightSpeed = rightSpeed;
+        this.servo1 = servo1;
+        this.servo2 = servo2;
+        this.servo3 = servo3;
+        this.servo4 = servo4;
+    }
 
-        if (leftSpeed < 0) leftSpeed = leftSpeed * -1;
-        if (leftSpeed > 255) leftSpeed = leftSpeed % 255;
-        if (rightSpeed < 0) leftSpeed = leftSpeed * -1;
-        if (rightSpeed > 255) leftSpeed = leftSpeed % 255;
+    void writeStates() {
+        statesAsString = new StringBuilder(new String(new char[] {
+                (char)(leftMotor.byt * 16 + rightMotor.byt),
+                (char)(leftSpeed),
+                (char)(rightSpeed),
+                (char)(servo1),
+                (char)(servo2),
+                (char)(servo3),
+                (char)(servo4),
+        }));
 
-        message[2] = HEX_SYMBOLS[leftSpeed/16];
-        message[3] = HEX_SYMBOLS[leftSpeed%16];
-        message[5] = HEX_SYMBOLS[rightSpeed/16];
-        message[6] = HEX_SYMBOLS[rightSpeed%16];
-
-        arduino.serialWrite(new String(message), message.length, 1);
+        arduino.serialWrite("" + ((char) 0xFF) + getStatus() + ((char) 0xFF), getStatus().length(), 1);
+        System.out.println(arduino.serialRead());
     }
 
     String getStatus() {
-        return status.toString();
+        return statesAsString.toString();
     }
 
     void start() {
         this.arduino.serialWrite('~');
+        available = true;
+        on = true;
     }
 
     void end()
@@ -62,6 +84,7 @@ class Robot {
         this.arduino = null;
         ArduinoWrapper.deactivate(arduinoKey);
         arduinoKey = null;
-        this.curMotorState = MotorState.COAST;
+        available = false;
+        on = false;
     }
 }

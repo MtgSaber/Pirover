@@ -6,39 +6,36 @@ package net.mtgsaber.pirover.chassiscontrol4;
  * Enumerates the various states in which the Pirover motors operate.
  */
 enum MotorState {
-    CLOCKWISE ('C', "Left"),
-    CCLOCKWISE ('D', "Right"),
-    COAST ('A', "Coast"),
-    BRAKE ('B', "Brake");
+    CLOCKWISE (((char) 0x01), "Left"),
+    CCLOCKWISE (((char) 0x02), "Right"),
+    COAST (((char) 0x00), "Coast"),
+    BRAKE (((char) 0x03), "Brake");
 
-    private char key;
-    private String name;
+    public final char byt;
+    public final String name;
 
-    MotorState(char key, String name) {
-        this.key = key;
+    MotorState(char byt, String name) {
+        this.byt = byt;
         this.name = name;
     }
-
-    public char getKey() { return this.key; }
-    public String getName() { return this.name; }
 
     public static char[] getKeysUsed() {
         char[] keys = new char[MotorState.values().length];
         for (int i=0; i < keys.length; i++)
-            keys[i] = MotorState.values()[i].getKey();
+            keys[i] = MotorState.values()[i].byt;
         return keys;
     }
 
-    public static MotorState getByKey(char key) {
+    public static MotorState getByByte(char byt) {
         for (MotorState motorState : values())
-            if (motorState.getKey() == key)
+            if (motorState.byt == byt)
                 return motorState;
         return null;
     }
 
     public static MotorState getByName(String name) {
         for (MotorState motorState : values())
-            if (motorState.getName().equals(name))
+            if (motorState.name.equals(name))
                 return motorState;
         return null;
     }
