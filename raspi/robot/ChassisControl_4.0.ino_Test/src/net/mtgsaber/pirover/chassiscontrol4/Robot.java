@@ -65,8 +65,9 @@ class Robot {
                 (char)(servo4),
         }));
 
-        arduino.serialWrite("" + ((char) 0xFF) + getStatus() + ((char) 0xFF), getStatus().length(), 1);
-        System.out.println(arduino.serialRead());
+        arduino.serialWrite("" + ((char) 0xFF) + getStatus() + ((char) 0xFF), getStatus().length() + 2, 1);
+        String feedback = arduino.serialRead();
+        System.out.println("Arduino Interpreted String:\n\t\"" + feedback + "\"\n\tLength: " + feedback.length());
     }
 
     String getStatus() {
