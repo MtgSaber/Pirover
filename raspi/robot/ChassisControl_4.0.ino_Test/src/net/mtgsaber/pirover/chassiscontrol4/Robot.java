@@ -52,11 +52,43 @@ class Robot {
         this.servo2 = servo2;
         this.servo3 = servo3;
         this.servo4 = servo4;
-    }
 
-    void writeStates() {
+        byte msbs = 0x00;
+
+        if (servo4 == 0x7F) servo4--;
+        else if (servo4 > 0x80) {
+            msbs += 1;
+            servo4 -= 0x80;
+        }
+        if (servo3 == 0x7F) servo3--;
+        else if (servo3 > 0x80) {
+            msbs += 2;
+            servo3 -= 0x80;
+        }
+        if (servo2 == 0x7F) servo2--;
+        else if (servo2 > 0x80) {
+            msbs += 4;
+            servo2 -= 0x80;
+        }
+        if (servo1 == 0x7F) servo1--;
+        else if (servo1 > 0x80) {
+            msbs += 8;
+            servo1 -= 0x80;
+        }
+        if (leftSpeed == 0x7F) leftSpeed--;
+        else if (leftSpeed > 0x80) {
+            msbs += 16;
+            leftSpeed -= 0x80;
+        }
+        if (rightSpeed == 0x7F) rightSpeed--;
+        else if (rightSpeed > 0x80) {
+            msbs += 32;
+            rightSpeed -= 0x80;
+        }
+
         statesAsString = new StringBuilder(new String(new char[] {
                 (char)(leftMotor.byt * 16 + rightMotor.byt),
+                (char)(msbs),
                 (char)(leftSpeed),
                 (char)(rightSpeed),
                 (char)(servo1),
@@ -64,8 +96,10 @@ class Robot {
                 (char)(servo3),
                 (char)(servo4),
         }));
+    }
 
-        arduino.serialWrite("" + ((char) 0xFF) + getStatus() + ((char) 0xFF), getStatus().length() + 2, 1);
+    void writeStates() {
+        arduino.serialWrite("" + ((char) 0x7F) + getStatus() + ((char) 0x7F));
         String feedback = arduino.serialRead();
         System.out.println("Arduino Interpreted String:\n\t\"" + feedback + "\"\n\tLength: " + feedback.length());
     }
