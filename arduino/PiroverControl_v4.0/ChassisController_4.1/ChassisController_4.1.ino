@@ -1,5 +1,5 @@
 /*
- * Chassis Control rev 4.1.1
+ * Chassis Control rev 4.1.2
  * Author: Andrew Arnold (MtgSaber) 3/24/2018
  * 
  * The Arduino will recieve Serial commands from Raspi and interpret them
@@ -53,6 +53,8 @@ const byte LEFTD0 = , LEFTD1 = , LEFTPWM = , RIGHTD0 = , RIGHTD1 = , RIGHTPWM = 
 String command;
 bool leftStateBits[2], rightStateBits[2];
 byte servo_0_pos, servo_1_pos, servo_2_pos, servo_3_pos, leftSpd, rightSpd;
+char input;
+bool buildingCommand = false;
 
 void setup() {
   Serial.begin(9600);
@@ -61,8 +63,6 @@ void setup() {
 // Collects Serial inputs, constructs commands from them, processes them, and changes outputs accordingly.
 void loop() {
   // wait for input
-  byte input;
-  bool buildingCommand = false;
   if (Serial.available()) {
     // build command
     while (Serial.available() > 0) {
@@ -122,7 +122,6 @@ void setOutputs() {
 }
 
 void confirm() {
-  for (byte i=0; i<8; i++)
-    Serial.write(command[i]);
+  Serial.print(command);
 }
 

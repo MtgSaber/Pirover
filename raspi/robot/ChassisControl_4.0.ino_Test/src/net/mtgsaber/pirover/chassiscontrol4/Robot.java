@@ -87,7 +87,7 @@ class Robot {
         }
 
         statesAsString = new StringBuilder(new String(new char[] {
-                (char)(leftMotor.byt * 16 + rightMotor.byt),
+                (char)(leftMotor.byt * 4 + rightMotor.byt),
                 (char)(msbs),
                 (char)(leftSpeed),
                 (char)(rightSpeed),
@@ -99,7 +99,7 @@ class Robot {
     }
 
     void writeStates() {
-        arduino.serialWrite("" + ((char) 0x7F) + getStatus() + ((char) 0x7F));
+        arduino.serialWrite("" + ((char) 0x7F) + getStatus() + ((char) 0x7F), getStatus().length()+2, 1);
         String feedback = arduino.serialRead();
         System.out.println("Arduino Interpreted String:\n\t\"" + feedback + "\"\n\tLength: " + feedback.length());
     }
