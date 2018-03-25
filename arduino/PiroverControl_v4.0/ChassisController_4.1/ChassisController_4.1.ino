@@ -1,10 +1,13 @@
 /*
- * Chassis Control rev 4.1
- * Author: Andrew Arnold (MtgSaber) 3/9/2018
+ * Chassis Control rev 4.1.1
+ * Author: Andrew Arnold (MtgSaber) 3/24/2018
  * 
  * The Arduino will recieve Serial commands from Raspi and interpret them
- * into chassis state changes. The command is a string of seven 'chars'. These chars are interpreted
- * as 2-digit Hexadecimal numbers and the string  will always begin with 0xFF and end with 0xFF.
+ * into chassis state changes. The command is a string of  'chars'. These chars are interpreted
+ * as 2-digit Hexadecimal numbers and the string  will always begin with 0x7F and end with 0x7F.
+ * 
+ * The format:
+ * 0x7F|motorStates|MSBs|leftSpeed|rightSpeed|servo1Position|servo2Position|servo3Position|servo4Position|0x7F
  * 
  * The chassis control circuit recieves the data for left and right speeds and states.   
  * These values are translated into the 3-signal formats for each side. These formats
@@ -13,7 +16,7 @@
  *    digital|digital|PWM
  *    state-bit0|state-bit1|motorSpeed
  * 
- * The first digit of the command represents the motor states, ranging from 0x00 to 0x0F.
+ * motorStates represents the motor states, ranging from 0x00 to 0x0F.
  * This number is split into two two-bit vectors that each represent the left and right
  * motor states, respectively. Each bit vector tranlates into the following motor states:
  * 
@@ -24,20 +27,32 @@
  *    
  * Note that each of the two chassis motor pairs has a set of these signals.
  * 
- * The next two chars represent the speeds of the motors, ranging from 0x00 to 0xFE.
- * The remaining chars represent the positions of the robot servos, ranging from 0x00 to 0xB4.
- * This unusual range is all that is needed due to the restrictions of the Servo library.
+ * MSBs ranges from 0x00 to 0x3F.
+ * 
+ * All chars after MSBs range from 0x00 to 0xFE.
+ * 
+ * MSBs is used to calculate the full value of the remaining values. If a bit-position is 1 then
+ * the corresponding value is increased by 0x80, effectively setting the MSB of the byte. This is
+ * in place because C++ chars only go up to 0x7F, while bytes go up to 0xFF. This allows for more
+ * precise motor speeds and servo positions. The format of MSBs:
+ * 
+ * 0|0|leftSpeed's MSB|rightSpeed's MSB|servo1Position's MSB|servo2Position's MSB|servo3Position's MSB|servo4Position's MSB
+ * 
+ * The range of leftSpeed and rightSpeed is effectively: [0x00, 0x7E],[0x80, 0xFE]
+ * 
+ * The range of servo1-servo4 is effectively: [0x00, 0x7E],[0x80, 0xB4].
+ * The Servo library measures in whole degrees [0-180], hence the unusual range.
+ * 
  */
 
 /*
-const short LEFTD0 = , LEFTD1 = , LEFTPWM = , RIGHTD0 = , RIGHTD1 = , RIGHTPWM = ,
+const byte LEFTD0 = , LEFTD1 = , LEFTPWM = , RIGHTD0 = , RIGHTD1 = , RIGHTPWM = ,
     SERVO_0 = , SERVO_1 = , SERVO_2 = , SERVO_3 = ;
 */
 
 String command;
 bool leftStateBits[2], rightStateBits[2];
 byte servo_0_pos, servo_1_pos, servo_2_pos, servo_3_pos, leftSpd, rightSpd;
-const short testLED = 3;
 
 void setup() {
   Serial.begin(9600);
@@ -46,13 +61,13 @@ void setup() {
 // Collects Serial inputs, constructs commands from them, processes them, and changes outputs accordingly.
 void loop() {
   // wait for input
-  char input;
+  byte input;
   bool buildingCommand = false;
   if (Serial.available()) {
     // build command
     while (Serial.available() > 0) {
       input = Serial.read();
-      if (input == 0xFF) {
+      if (input == 0x7F) {
         if (buildingCommand)
           processCommand();
         buildingCommand = !buildingCommand;
@@ -65,10 +80,16 @@ void loop() {
 
 // Interprets command and sets output variables accordingly
 void processCommand() {
-  if (command.length() != 7) return;
+  if (command.length() != 8) return;
   if (command[0] > 0xF) return;
-  for (byte i=3; i<7; i++)
-    if (command[i] > 0xB4) return;
+  byte msbs = command[1];
+  if (msbs > 0x3F) return;
+  for (byte i=7; i>3; i--) {
+    if (msbs % 2 == 1) {
+      if (command[i] > 0x34) return;
+    } else if (command[i] > 0x7E) return;
+    msbs = msbs / 2;
+  }
 
   byte states = command[0];
   rightStateBits[1] = states % 2;
@@ -78,13 +99,18 @@ void processCommand() {
   leftStateBits[1] = states % 2;
   states = states / 2;
   leftStateBits[0] = states % 2;
-
-  leftSpd = command[1];
-  rightSpd = command[2];
-  servo_0_pos = command[3];
-  servo_1_pos = command[4];
-  servo_2_pos = command[5];
-  servo_3_pos = command[6];
+  
+  servo_3_pos = command[7] + (msbs%2 == 1? 0x80 : 0x00);
+  msbs = msbs / 2;
+  servo_2_pos = command[6] + (msbs%2 == 1? 0x80 : 0x00);
+  msbs = msbs / 2;
+  servo_1_pos = command[5] + (msbs%2 == 1? 0x80 : 0x00);
+  msbs = msbs / 2;
+  servo_0_pos = command[4] + (msbs%2 == 1? 0x80 : 0x00);
+  msbs = msbs / 2;
+  rightSpd = command[3] + (msbs%2 == 1? 0x80 : 0x00);
+  msbs = msbs / 2;
+  leftSpd = command[2] + (msbs%2 == 1? 0x80 : 0x00);
 
   setOutputs();
 }
@@ -96,7 +122,7 @@ void setOutputs() {
 }
 
 void confirm() {
-  for (byte i=0; i<7; i++)
+  for (byte i=0; i<8; i++)
     Serial.write(command[i]);
 }
 
