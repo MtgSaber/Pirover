@@ -5,7 +5,7 @@ package net.mtgsaber.pirover.chassiscontrol4;
  *
  * Enumerates the various states in which the Pirover motors operate.
  */
-enum MotorState {
+public enum MotorState {
     CLOCKWISE (((char) 0x01), "Left"),
     CCLOCKWISE (((char) 0x02), "Right"),
     COAST (((char) 0x00), "Coast"),
