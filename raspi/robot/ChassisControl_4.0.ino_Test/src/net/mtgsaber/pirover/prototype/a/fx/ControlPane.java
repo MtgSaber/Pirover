@@ -1,4 +1,4 @@
-package net.mtgsaber.pirover.prototype.a;
+package net.mtgsaber.pirover.prototype.a.fx;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.Control;

@@ -1,0 +1,6 @@
+Steppers: 2A, 45N*cm, 200step/rev, NEMA 17, 42 x 42 x 40 mm (HxWxD), Shaft Diam.=5mm, Shaft L=23, Shaft D-cut L=21, Mass=310g, Qty=2, ext. price=$25.98, link=https://www.amazon.com/Stepper-Motor-Bipolar-64oz-Printer/dp/B00PNEQI7W 
+H-Bridge Driver ICs: L298N, qty=2, ext. price=$9.72, link=https://www.mouser.com/ProductDetail/STMicroelectronics/L298N?qs=gr8Zi5OG3Mj6jDtNclcF9Q%3D%3D 
+Correction Diodes: 2A, Vf <= 1.2V @ 2A, rtt <= 200ns, qty=16, ext. price=$4.592, link=https://www.mouser.com/ProductDetail/ON-Semiconductor/MUR220G?qs=sGAEpiMZZMtbRapU8LlZD9Yt6EMzPspSMtU%252bMH0P1Ok%3d 
+L298N PSU capacitors, bulk: 
+" " ", req'd by datasheet: .1uF, qty=4, ext. price=$.32, link=https://www.mouser.com/ProductDetail/Vishay/A104K15X7RF5UAA?qs=sGAEpiMZZMt3KoXD5rJ2N3O%2f34ZwDCUjMNc7uRiEHVM%3d 
+" Sense resistors: .5Ohm, non-wire-wound, qty needed=4, min. purchase=10, ext. price=$.75, link=https://www.mouser.com/ProductDetail/Xicon/294-05-RC?qs=sGAEpiMZZMsPqMdJzcrNwgB3p4v%2fUhJs5lAQMYsfcXc%3d 

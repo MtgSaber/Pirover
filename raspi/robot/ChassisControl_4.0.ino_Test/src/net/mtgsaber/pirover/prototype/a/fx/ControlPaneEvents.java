@@ -1,10 +1,11 @@
-package net.mtgsaber.pirover.prototype.a;
+package net.mtgsaber.pirover.prototype.a.fx;
 
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.ScrollEvent;
 import net.mtgsaber.pirover.chassiscontrol4.MotorState;
 import net.mtgsaber.pirover.chassiscontrol4.Robot;
+import net.mtgsaber.pirover.prototype.a.RobotTicker;
 
 import java.util.ArrayList;
 
@@ -218,14 +219,12 @@ public class ControlPaneEvents {
     }
 
     private boolean speedNotIgnored(boolean left) {
-        /*
+
         if (left) return
                 robot.getLeftMotor() == MotorState.CLOCKWISE
                         || robot.getLeftMotor() == MotorState.CCLOCKWISE;
         else return
                 robot.getRightMotor() == MotorState.CLOCKWISE
                         || robot.getRightMotor() == MotorState.CCLOCKWISE;
-                        */
-        return true;
     }
 }

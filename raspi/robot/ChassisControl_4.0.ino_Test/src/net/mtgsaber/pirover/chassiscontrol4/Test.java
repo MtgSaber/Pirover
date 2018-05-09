@@ -14,7 +14,7 @@ public class Test {
             robot.start();
             pause(500);
             System.out.println("Setting Robot states...");
-            robot.setStates(MotorState.BRAKE, MotorState.BRAKE, 0x7E, 0x7E, 0x0, 0x0, 0x0, 0x0);
+            robot.setStates(MotorState.CLOCKWISE, MotorState.CCLOCKWISE, 0x7E, 0x7E, 0x0, 0x0, 0x0, 0x0);
             pause(500);
             System.out.print("Robot command is:\n\t");
             for (char c : robot.getStatus().toCharArray())

@@ -21,5 +21,20 @@ Specifications:
 	- Fuses across all motor leads
 	- Small ceramic capacitors across all motor leads
 	- Small ceramic capacitor in parallel with motors
-	- Electrolytic capacitors 
+	- Electrolytic capacitors
+	
+	v3:
+	- Drives stepper motors instead of Brushed DC
+	- Consists of two components:
+		- Translation, Step Counter and Step Indication Signals (SIS)
+			- Each stepper is controlled by a digital signal and a pulse from Arduino
+			- Each pulse indicates a step in the direction indicated by the digital signal
+			- Uses an MSP430 device to set the SIS based on step increments/decrements
+				- Wakes up every pulse, reads the direction signal, and changes step phase accordingly
+			- SIS is sent to H-Bridge Stepper Driver
+			- Routes the Error signals from H-Bridge Stepper Driver back to Arduino
+		- H-Bridge Stepper Driver
+			- Uses two full bridge chips to drive motor phases
+			- H-Bridge chips put out a regulated current for the phases and send fault reports to Arduino
+			- Connects directly to power supply
 	
