@@ -43,6 +43,11 @@
  * The range of servo1-servo4 is effectively: [0x00, 0x7E],[0x80, 0xB4].
  * The Servo library measures in whole degrees [0-180], hence the unusual range.
  * 
+ * 
+ * 
+ * GOOD FOR TESTING
+ * 
+ * 
  */
 
 
@@ -57,15 +62,17 @@ char input;
 bool buildingCommand = false;
 
 void setup() {
-  TCCR2B = (TCCR2B & 0b11111000) | 0x06;
-  
+  TCCR2B = (TCCR2B & 0b11111000) | 0x06;  // what does this do?
+
+  // pin mode setup
   pinMode(LEFTD0, OUTPUT);
   pinMode(LEFTD1, OUTPUT);
   pinMode(LEFTPWM, OUTPUT);
   pinMode(RIGHTD0, OUTPUT);
   pinMode(RIGHTD1, OUTPUT);
   pinMode(RIGHTPWM, OUTPUT);
-  
+
+  // initialize motors to coast with speed=0
   digitalWrite(LEFTD0, LOW);
   digitalWrite(LEFTD1, LOW);
   digitalWrite(RIGHTD0, LOW);
@@ -96,6 +103,7 @@ void loop() {
 
 // Interprets command and sets output variables accordingly
 void processCommand() {
+  // Appears to fail silently on bad inputs
   if (command.length() != 8) return;
   if (command[0] > 0xF) return;
   byte msbs = command[1];
@@ -107,6 +115,7 @@ void processCommand() {
     msbs = msbs / 2;
   }
 
+  
   byte states = command[0];
   rightStateBits[1] = states % 2;
   states = states / 2;
@@ -115,6 +124,7 @@ void processCommand() {
   leftStateBits[1] = states % 2;
   states = states / 2;
   leftStateBits[0] = states % 2;
+
 
   msbs = command[1];
   servo_3_pos = command[7] + (msbs%2 != 0? 0x80 : 0x00);
@@ -146,4 +156,3 @@ void setOutputs() {
 
 void confirm() {
 }
-
