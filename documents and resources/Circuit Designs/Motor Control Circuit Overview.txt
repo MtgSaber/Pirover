@@ -39,4 +39,10 @@ Specifications:
 			- H-Bridge chips put out a regulated current for the phases and
 			  send fault reports to Arduino
 			- Connects directly to power supply
+			
+	v5:
+	- Reverting back to v2. All attributes of that version apply here.
+	- A more robust H-Bridge
+	- Proper back-emf protection
+	- Attempt to implement regenerative braking
 	
